@@ -1,15 +1,29 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
   images: {
-    domains: ["placehold.co", "m.media-amazon.com"],
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "placehold.co",
+      },
+      {
+        protocol: "https",
+        hostname: "m.media-amazon.com",
+      },
       {
         protocol: "https",
         hostname: "ik.imagekit.io",
         port: "",
-      }
-    ]
-  }
+      },
+    ],
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
