@@ -26,7 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { FIELD_NAMES, FIELD_TYPES } from "@/constants/index";
-import ImageUpload from "./ImageUpload";
+import FileUpload from "./FileUpload";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner";
@@ -45,7 +45,7 @@ const AuthForm = <T extends FieldValues>({
   onSubmit,
 }: Props<T>) => {
   const router = useRouter();
-  console.log("AuthForm Type:", type);
+
   const isSignIn = type === "SIGN_IN";
 
   const form: UseFormReturn<T> = useForm({
@@ -54,8 +54,6 @@ const AuthForm = <T extends FieldValues>({
   });
 
   const handleSubmit: SubmitHandler<T> = async (data) => {
-    const { toast } = useToast(); // Add this line to get toast from the hook
-
     const result = await onSubmit(data);
 
     if (result.success) {
@@ -65,11 +63,10 @@ const AuthForm = <T extends FieldValues>({
           : "You have successfully signed up",
       });
 
-      router.push("./");
+      router.push("/");
     } else {
       toast(`Error ${isSignIn ? "signing in" : "signing up"}`, {
         description: result.error ?? "An error occurred",
-        variant: "destructive",
       });
     }
   };
@@ -87,25 +84,35 @@ const AuthForm = <T extends FieldValues>({
       </p>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-          {Object.keys(defaultValues).map((key) => (
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="w-full space-y-6"
+        >
+          {Object.keys(defaultValues).map((field) => (
             <FormField
-              key={key}
+              key={field}
               control={form.control}
-              name={key as Path<T>}
+              name={field as Path<T>}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="capitalize">
-                    {FIELD_NAMES[key as keyof typeof FIELD_NAMES] || key}
+                    {FIELD_NAMES[field.name as keyof typeof FIELD_NAMES]}
                   </FormLabel>
                   <FormControl>
-                    {key === "universityCard" ? (
-                      <ImageUpload onFileChange={field.onChange} />
+                    {field.name === "universityCard" ? (
+                      <FileUpload
+                        type="image"
+                        accept="image/*"
+                        placeholder="Upload your university ID"
+                        folder="ids"
+                        variant="dark"
+                        onFileChange={field.onChange}
+                      />
                     ) : (
                       <Input
                         required
                         type={
-                          FIELD_TYPES[key as keyof typeof FIELD_TYPES] || "text"
+                          FIELD_TYPES[field.name as keyof typeof FIELD_TYPES]
                         }
                         {...field}
                         className="form-input"
@@ -126,6 +133,7 @@ const AuthForm = <T extends FieldValues>({
 
       <p className="text-center text-base font-medium">
         {isSignIn ? "New to BookWise? " : "Already have an account? "}
+
         <Link
           href={isSignIn ? "/sign-up" : "/sign-in"}
           className="font-bold text-primary"
