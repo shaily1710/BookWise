@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import ColorPicker from "../ColorPicker";
 import {
   Form,
   FormControl,
@@ -18,15 +18,15 @@ import { bookSchema } from "@/lib/validations";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import FileUpload from "@/components/FileUpload";
-// import ColorPicker from "@/components/admin/ColorPicker";
-// import { createBook } from "@/lib/admin/actions/book";
-// import { toast } from "@/hooks/use-toast";
+import createBook from "@/lib/admin/actions/book";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props extends Partial<Book> {
   type?: "create" | "update";
 }
 
 const BookForm = ({ type, ...book }: Props) => {
+  const { toast } = useToast();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof bookSchema>>({
@@ -40,12 +40,27 @@ const BookForm = ({ type, ...book }: Props) => {
       totalCopies: 1,
       coverUrl: "",
       coverColor: "",
-      videoUrl: "",
       summary: "",
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof bookSchema>) => {};
+  const onSubmit = async (values: z.infer<typeof bookSchema>) => {
+    const result = await createBook(values);
+
+    if (result.success) {
+      toast({
+        title: "success",
+        description: "Book created successfully",
+      });
+
+      router.push("/admin/books/${result.data.id}");
+    } else {
+      toast({
+        title: "error",
+        description: result.message,
+      });
+    }
+  };
 
   return (
     <Form {...form}>
@@ -189,10 +204,10 @@ const BookForm = ({ type, ...book }: Props) => {
                 Primary Color
               </FormLabel>
               <FormControl>
-                {/* <ColorPicker
+                <ColorPicker
                   onPickerChange={field.onChange}
                   value={field.value}
-                /> */}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -220,7 +235,7 @@ const BookForm = ({ type, ...book }: Props) => {
           )}
         />
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name={"videoUrl"}
           render={({ field }) => (
@@ -242,7 +257,7 @@ const BookForm = ({ type, ...book }: Props) => {
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
         <FormField
           control={form.control}
           name={"summary"}

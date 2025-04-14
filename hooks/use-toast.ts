@@ -1,10 +1,10 @@
 "use client";
 
-import { toast } from "@/components/ui/sonner";
+import { toast as sonnerToast } from "@/components/ui/sonner";
 
 export function useToast() {
   return {
-    toast: (message: string, options?: any) => toast(message, options),
-    dismiss: (id?: string) => toast.dismiss(id),
+    toast: (options: any) => sonnerToast(options), // accept object options
+    dismiss: (id?: string) => sonnerToast.dismiss(id),
   };
 }
