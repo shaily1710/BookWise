@@ -18,8 +18,9 @@ import { bookSchema } from "@/lib/validations";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import FileUpload from "@/components/FileUpload";
-import createBook from "@/lib/admin/actions/book";
+import { createBook } from "@/lib/admin/actions/book";
 import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface Props extends Partial<Book> {
   type?: "create" | "update";
@@ -48,17 +49,11 @@ const BookForm = ({ type, ...book }: Props) => {
     const result = await createBook(values);
 
     if (result.success) {
-      toast({
-        title: "success",
-        description: "Book created successfully",
-      });
+      toast("Book created successfully");
 
-      router.push("/admin/books/${result.data.id}");
+      router.push(`/admin/books/${result.data.id}`);
     } else {
-      toast({
-        title: "error",
-        description: result.message,
-      });
+      toast("Failed to create book");
     }
   };
 
@@ -234,30 +229,6 @@ const BookForm = ({ type, ...book }: Props) => {
             </FormItem>
           )}
         />
-
-        {/* <FormField
-          control={form.control}
-          name={"videoUrl"}
-          render={({ field }) => (
-            <FormItem className="flex flex-col gap-1">
-              <FormLabel className="text-base font-normal text-dark-500">
-                Book Trailer
-              </FormLabel>
-              <FormControl>
-                <FileUpload
-                  type="video"
-                  accept="video/*"
-                  placeholder="Upload a book trailer"
-                  folder="books/videos"
-                  variant="light"
-                  onFileChange={field.onChange}
-                  value={field.value}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
         <FormField
           control={form.control}
           name={"summary"}

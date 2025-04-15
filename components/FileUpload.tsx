@@ -1,7 +1,9 @@
 "use client";
+
 import React, { useRef, useState } from "react";
 import { IKImage, ImageKitProvider, IKUpload, IKVideo } from "imagekitio-next";
 import config from "@/lib/config";
+import ImageKit from "imagekit";
 import Image from "next/image";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -34,7 +36,7 @@ const authenticator = async () => {
 };
 
 interface Props {
-  type: "image" | "video";
+  type: "image";
   accept: string;
   placeholder: string;
   folder: string;
@@ -86,15 +88,10 @@ const FileUpload = ({
     });
   };
 
-  const onVaidate = (file: File) => {
+  const onValidate = (file: File) => {
     if (type === "image") {
       if (file.size > 20 * 1024 * 1024) {
         toast.error("Image size should be less than 20MB");
-        return false;
-      }
-    } else if (type === "video") {
-      if (file.size > 50 * 1024 * 1024) {
-        toast.error("Video size should be less than 50MB");
         return false;
       }
     }
@@ -113,7 +110,7 @@ const FileUpload = ({
         onError={onError}
         onSuccess={onSuccess}
         useUniqueFileName={true}
-        validateFile={onVaidate}
+        validateFile={onValidate}
         onUploadStart={() => {
           setProgress(0);
         }}
@@ -146,7 +143,9 @@ const FileUpload = ({
         <p className={cn("text-base", styles.placeholder)}>{placeholder}</p>
 
         {file && <p className={cn("upload-filename", styles.text)}></p>}
-        {file && <p className="upload-filename">{file.filePath}</p>}
+        {file && (
+          <p className={cn("upload-filename", styles.text)}>{file.filePath}</p>
+        )}
       </button>
 
       {progress > 0 && (
