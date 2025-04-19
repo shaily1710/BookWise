@@ -30,6 +30,8 @@ import FileUpload from "./FileUpload";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
 
 interface Props<T extends FieldValues> {
   schema: ZodType<T>;
@@ -45,7 +47,7 @@ const AuthForm = <T extends FieldValues>({
   onSubmit,
 }: Props<T>) => {
   const router = useRouter();
-
+  const [error, setError] = useState("");
   const isSignIn = type === "SIGN_IN";
 
   const form: UseFormReturn<T> = useForm({
@@ -53,21 +55,53 @@ const AuthForm = <T extends FieldValues>({
     defaultValues: defaultValues as DefaultValues<T>,
   });
 
+  // const handleSubmit: SubmitHandler<T> = async (data) => {
+  //   const result = await onSubmit(data);
+
+  //   if (result.success) {
+  //     toast("Success", {
+  //       description: isSignIn
+  //         ? "You have successfully signed in"
+  //         : "You have successfully signed up",
+  //     });
+
+  //     router.push("/");
+  //   } else {
+  //     toast(`Error ${isSignIn ? "signing in" : "signing up"}`, {
+  //       description: result.error ?? "An error occurred",
+  //     });
+  //   }
+  // };
+
   const handleSubmit: SubmitHandler<T> = async (data) => {
-    const result = await onSubmit(data);
-
-    if (result.success) {
-      toast("Success", {
-        description: isSignIn
-          ? "You have successfully signed in"
-          : "You have successfully signed up",
+    if (isSignIn) {
+      // Handle sign-in on the client-side using NextAuth
+      const result = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
       });
 
-      router.push("/");
+      if (result?.error) {
+        setError("Invalid email or password");
+      } else {
+        toast("You have successfully signed in");
+        router.push("/"); // Redirect after successful sign-in
+      }
     } else {
-      toast(`Error ${isSignIn ? "signing in" : "signing up"}`, {
-        description: result.error ?? "An error occurred",
-      });
+      // Handle sign-up as before
+      const result = await onSubmit(data);
+
+      if (result.success) {
+        toast("Success", {
+          description: "You have successfully signed up",
+        });
+        router.push("/"); // Redirect after successful sign-up
+      } else {
+        toast(`Error signing up`, {
+          description: result.error ?? "An error occurred",
+        });
+      }
     }
   };
 

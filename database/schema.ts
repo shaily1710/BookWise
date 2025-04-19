@@ -21,8 +21,8 @@ export const users = pgTable("users", {
 
 export const books = pgTable("books", {
   id: uuid('id').notNull().primaryKey().defaultRandom().unique(),
-  title: varchar('title', { length: 255 }).notNull(),
-  author: varchar('author', { length: 255 }).notNull(),
+  title: varchar('title', { length: 512 }).notNull(),
+  author: varchar('author', { length: 512 }).notNull(),
   genre: text('genre').notNull(),
   rating: integer('rating').notNull(),
   coverUrl: text('cover_url').notNull(),
@@ -30,6 +30,6 @@ export const books = pgTable("books", {
   description: text('description').notNull(),
   totalCopies: integer('total_copies').notNull(),
   availableCopies: integer('available_copies').notNull().default(0),
-  summary: varchar('summary', { length: 255 }).notNull(),
+  summary: varchar('summary', { length: 1000 }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 })
